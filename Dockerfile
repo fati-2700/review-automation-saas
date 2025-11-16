@@ -1,46 +1,22 @@
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files and prisma
-COPY package*.json ./
-COPY prisma ./prisma/
-
-# Install all dependencies
-RUN npm ci
-
-# Copy source code
-COPY . .
-
-# Generate Prisma Client
-RUN npx prisma generate
-
-# Build TypeScript
-RUN npm run build
-
-# Production stage
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+COPY prisma ./prisma/
 
-# Copy prisma BEFORE npm install
-COPY --from=builder /app/prisma ./prisma/
+RUN npm ci
 
-# Install production dependencies
-RUN npm ci --only=production
+COPY . .
 
-# Generate Prisma Client in production
 RUN npx prisma generate
 
-# Copy built files
-COPY --from=builder /app/dist ./dist
-
-# Expose port
 EXPOSE 3000
 
-# Start server
-CMD npx prisma migrate deploy && node dist/server.js
-
+CMD sh -c "echo 'Step 1: Running migrations' && \
+           npx prisma migrate deploy && \
+           echo 'Step 2: Migrations complete' && \
+           echo 'Step 3: Listing files' && \
+           ls -la src/ && \
+           echo 'Step 4: Starting server' && \
+           npx tsx src/server.ts"
