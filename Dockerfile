@@ -42,5 +42,4 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 3000
 
 # Start server
-CMD npx prisma migrate deploy && node dist/server.js
-
+CMD sh -c "npx prisma migrate deploy && echo 'Starting server...' && node dist/server.js || (echo 'Server failed to start' && exit 1)"
