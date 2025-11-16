@@ -5,27 +5,13 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc && prisma generate",
     "start": "node dist/server.js",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio"
-    "start": "node src/index.js",
-    "build": "prisma generate && prisma migrate deploy",
-    "postinstall": "prisma generate"
-
-}
-```
-
-**2. En Railway, agrega esta variable de entorno:**
-```
-PRISMA_CLI_BINARY_TARGETS=native,debian-openssl-3.0.x
-```
-
-O también puedes probar con:
-```
-PRISMA_CLI_BINARY_TARGETS=native,rhel-openssl-3.0.x
   },
   "keywords": [],
   "author": "",
