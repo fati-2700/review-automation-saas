@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install all dependencies
+# Install all dependencies (including tsx)
 RUN npm ci
 
 # Copy source code
@@ -15,31 +15,8 @@ COPY . .
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Build TypeScript
-RUN npm run build
-
-# Production stage
-FROM node:20-alpine
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Copy prisma BEFORE npm install
-COPY --from=builder /app/prisma ./prisma/
-
-# Install production dependencies
-RUN npm ci --only=production
-
-# Generate Prisma Client in production
-RUN npx prisma generate
-
-# Copy built files
-COPY --from=builder /app/dist ./dist
-
 # Expose port
 EXPOSE 3000
 
-# Start server
-CMD sh -c "npx prisma migrate deploy && echo 'Starting server...' && node dist/server.js || (echo 'Server failed to start' && exit 1)"
+# Start with tsx (runs TypeScript directly)
+CMD npx prisma migrate deploy && npx tsx src/server.ts
